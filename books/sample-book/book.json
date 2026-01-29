@@ -1,0 +1,9 @@
+{
+  "id": "sample-book",
+  "title": "The Invisible Sandwich",
+  "subtitle": "Demo with line-by-line translations",
+  "cover": "cover.svg",
+  "content": "content.txt",
+  "sourceLanguage": "English",
+  "defaultTarget": "Ukrainian"
+}

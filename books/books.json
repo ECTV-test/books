@@ -1,0 +1,11 @@
+{
+  "title": "Books",
+  "items": [
+    {
+      "id": "sample-book",
+      "title": "The Invisible Sandwich",
+      "subtitle": "Demo with line-by-line translations",
+      "cover": "books/sample-book/cover.svg"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#6d28d9"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1200" rx="48" fill="url(#g)"/>
+  <text x="70" y="210" font-size="64" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="700">The Invisible Sandwich</text>
+  <text x="70" y="280" font-size="28" fill="#d1d5db" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial">Sample book (replace with your own)</text>
+  <g opacity="0.9">
+    <rect x="70" y="360" width="760" height="520" rx="32" fill="#ffffff" opacity="0.10"/>
+    <text x="110" y="460" font-size="34" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial">✅ Multi-book library</text>
+    <text x="110" y="520" font-size="34" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial">✅ Theme (light/dark)</text>
+    <text x="110" y="580" font-size="34" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial">✅ Language switch</text>
+    <text x="110" y="640" font-size="34" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial">✅ Translation under each line</text>
+  </g>
+</svg>
