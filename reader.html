@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reader</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body class="app">
+  <header class="topbar topbar-dark">
+    <a id="backBtn" class="btn btn-ghost" href="details.html">← Назад</a>
+
+    <div class="readerHead">
+      <img id="coverImg" class="miniCover" alt="Cover" />
+      <div class="readerHeadText">
+        <div id="author" class="muted small"></div>
+        <div id="title" class="readerTitle">—</div>
+        <div class="muted small"><span id="level"></span> · <span id="minutes"></span></div>
+      </div>
+    </div>
+
+    <a id="catalogBtn" class="btn btn-ghost" href="index.html">Каталог</a>
+  </header>
+
+  <main class="readerMain">
+    <div class="readerContainer">
+      <div class="crumb muted small"><span id="crumbTitle"></span></div>
+      <div id="content" class="content"></div>
+    </div>
+  </main>
+
+  <!-- bottom player -->
+  <div class="playerBar">
+    <div class="playerLeft">
+      <div id="playerTitle" class="playerTitle">—</div>
+      <input id="progress" class="progress" type="range" min="0" max="100" value="0" />
+    </div>
+
+    <div class="playerRight">
+      <div class="pctWrap"><span id="pct">0%</span></div>
+      <button id="stopBtn" class="iconBtn" title="Stop">■</button>
+      <button id="settingsBtn" class="iconBtn" title="Settings">⚙︎</button>
+      <button id="playBtn" class="playBtn" title="Play / Pause">▶</button>
+    </div>
+  </div>
+
+  <!-- settings panel -->
+  <div id="mask" class="mask hidden"></div>
+  <aside id="panel" class="settingsPanel hidden" aria-hidden="true">
+    <div class="panelHead">
+      <div class="panelTitle">Налаштування</div>
+      <button id="closePanel" class="iconBtn">✕</button>
+    </div>
+
+    <div class="panelBody">
+      <div class="row">
+        <div>
+          <div class="rowTitle">Мова перекладу</div>
+          <div class="rowHint">Показувати рядок під оригіналом</div>
+        </div>
+        <select id="langSelect" class="select"></select>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="rowTitle">Розмір тексту</div>
+          <div class="rowHint">A− / A+</div>
+        </div>
+        <div class="seg">
+          <button id="fontDown" class="segBtn">A−</button>
+          <button id="fontUp" class="segBtn">A+</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="rowTitle">Швидкість читання</div>
+          <div class="rowHint" id="rateLbl">1.00×</div>
+        </div>
+        <input id="rate" class="range" type="range" min="0.75" max="1.5" step="0.05" value="1" />
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="rowTitle">Колір підсвітки</div>
+          <div class="rowHint">Default / Yellow</div>
+        </div>
+        <div class="seg">
+          <button class="segBtn" data-hl="default">Default</button>
+          <button class="segBtn" data-hl="yellow">Yellow</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="rowTitle">Переклад</div>
+          <div class="rowHint">показувати під рядком</div>
+        </div>
+        <label class="switch">
+          <input id="showTr" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="rowTitle">Тема</div>
+          <div class="rowHint">нічний режим</div>
+        </div>
+        <label class="switch">
+          <input id="theme" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="rowTitle">Підсвітка</div>
+          <div class="rowHint">активний рядок</div>
+        </div>
+        <label class="switch">
+          <input id="hl" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="panelNote">
+        Переклад: локальний файл (кеш).<br/>
+        Якщо потім підключимо API — додамо авто‑переклад і кешування.
+      </div>
+    </div>
+  </aside>
+
+  <script src="assets/reader.js"></script>
+</body>
+</html>
