@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Reader</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <button class="iconbtn" id="backBtn" aria-label="Back">←</button>
+    <div class="topbar__title" id="readerTitle">Reader</div>
+    <button class="iconbtn" id="settingsBtn" aria-label="Settings">⚙︎</button>
+  </header>
+
+  <main class="reader">
+    <div class="reader__content container" id="lines"></div>
+  </main>
+
+  <!-- Playback bar -->
+  <footer class="player">
+    <button class="player__btn" id="playBtn">▶︎</button>
+    <button class="player__btn" id="pauseBtn">❚❚</button>
+
+    <input class="player__range" id="progress" type="range" min="0" max="0" value="0" />
+    <div class="player__meta">
+      <span id="pos">0</span>/<span id="total">0</span>
+    </div>
+  </footer>
+
+  <!-- Settings modal -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal__sheet" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="modal__header">
+        <div class="modal__title">Settings</div>
+        <button class="iconbtn" id="closeModal">✕</button>
+      </div>
+
+      <div class="form">
+        <label class="field">
+          <span>Translation language</span>
+          <select id="langSelect"></select>
+        </label>
+
+        <label class="field">
+          <span>Highlight style</span>
+          <select id="hlSelect">
+            <option value="default">Default</option>
+            <option value="yellow">Yellow</option>
+            <option value="invert">Black</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Original size</span>
+          <input id="fontSize" type="range" min="16" max="28" value="20" />
+        </label>
+
+        <label class="field">
+          <span>Line spacing</span>
+          <input id="lineHeight" type="range" min="1.2" max="2.0" step="0.05" value="1.5" />
+        </label>
+      </div>
+    </div>
+    <div class="modal__backdrop" id="backdrop"></div>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    App.renderReader();
+  </script>
+</body>
+</html>

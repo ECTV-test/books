@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Book</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <button class="iconbtn" id="backBtn" aria-label="Back">←</button>
+    <div class="topbar__title" id="bookTitle">Book</div>
+    <div class="topbar__right"></div>
+  </header>
+
+  <main class="container">
+    <section class="bookcard">
+      <img class="bookcard__cover" id="cover" alt="Cover" />
+      <div class="bookcard__meta">
+        <div class="bookcard__name" id="title"></div>
+        <div class="pill" id="level"></div>
+        <p class="bookcard__desc" id="desc"></p>
+      </div>
+    </section>
+
+    <div class="actions">
+      <a class="btn primary" id="listenBtn">Listen</a>
+      <a class="btn" id="homeBtn">Catalog</a>
+    </div>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    App.renderBookPage();
+  </script>
+</body>
+</html>
