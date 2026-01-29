@@ -1,0 +1,10 @@
+{
+  "books": [
+    {
+      "id": "invisible-sandwich",
+      "title": "The Invisible Sandwich",
+      "level": "A1 English Learners",
+      "cover": "data/books/invisible-sandwich/cover.jpg"
+    }
+  ]
+}
