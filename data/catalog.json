@@ -1,0 +1,10 @@
+[
+  {
+    "id": "invisible-sandwich",
+    "title": "The Invisible Sandwich",
+    "author": "Oxford Reading University",
+    "level": "A1 English Learners",
+    "minutes": 12,
+    "cover": "data/books/invisible-sandwich/cover.jpg"
+  }
+]

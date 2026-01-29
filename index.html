@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Books</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div class="catalog-wrap">
+    <div class="catalog-head">
+      <div class="brand pill">
+        <div class="dot" aria-hidden="true"></div>
+        <div>
+          <div style="font-size:14px">Books</div>
+          <small>GitHub Pages template • multi-language</small>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="iconbtn" id="themeBtn" title="Theme">
+          <span aria-hidden="true">☾</span>
+        </button>
+        <button class="iconbtn" id="reloadBtn" title="Reload">
+          <span aria-hidden="true">↻</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pill" style="margin-bottom:16px">
+      <div>
+        <div style="font-weight:800">Your library</div>
+        <small>Add new books as folders in <b>/data/books/&lt;book-id&gt;/</b> and list them in <b>/data/catalog.json</b>.</small>
+      </div>
+    </div>
+
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <script src="assets/index.js"></script>
+</body>
+</html>
