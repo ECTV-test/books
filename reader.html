@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reader</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <button class="btn" id="backBtn">← Назад</button>
+      <div class="brandmark">
+        <span class="logo"></span>
+        <div class="crumbs">
+          <div class="crumbTitle" id="crumbTitle">Бібліотека</div>
+          <div class="crumbSub" id="crumbSub">GitHub Pages</div>
+        </div>
+      </div>
+      <div class="topRight">
+        <button class="btn" id="catalogBtn">Каталог</button>
+        <button class="btn" id="settingsBtn">⚙︎</button>
+      </div>
+    </header>
+
+    <main class="readerShell">
+      <aside class="coverCol" id="coverCol">
+        <img id="coverImg" class="coverImg" alt="Cover" />
+      </aside>
+
+      <section class="paper">
+        <div class="metaTop">
+          <div class="author" id="author"></div>
+          <h1 class="h1" id="title"></h1>
+          <div class="chips">
+            <span class="chip"><span class="dotGreen"></span><span id="level"></span></span>
+            <span class="chip">🕒 <span id="minutes"></span> хв</span>
+          </div>
+        </div>
+
+        <div class="readerContent" id="content"></div>
+      </section>
+    </main>
+
+    <!-- bottom player -->
+    <div class="playerBar">
+      <div class="playerLeft">
+        <div class="playerTitle" id="playerTitle">—</div>
+        <div class="playerProg">
+          <input id="progress" type="range" min="0" max="100" value="0" step="1" />
+          <div class="playerPct" id="pct">0%</div>
+        </div>
+      </div>
+      <div class="playerBtns">
+        <button class="pbtn" id="stopBtn" title="Stop">⏹</button>
+        <button class="pbtn primary" id="playBtn" title="Play/Pause">▶</button>
+      </div>
+    </div>
+
+    <!-- settings panel -->
+    <div class="panelMask" id="mask"></div>
+    <aside class="panel" id="panel">
+      <div class="panelHead">
+        <div class="panelTitle">Налаштування</div>
+        <button class="panelClose" id="closePanel">×</button>
+      </div>
+
+      <div class="panelBody">
+        <div class="row">
+          <div>
+            <div class="label">Мова перекладу</div>
+            <div class="hint">переклад рядком під оригіналом</div>
+          </div>
+          <select id="langSelect" class="select"></select>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">Розмір тексту</div>
+            <div class="hint">A− / A+</div>
+          </div>
+          <div class="seg">
+            <button class="segBtn" id="fontDown">A−</button>
+            <button class="segBtn" id="fontUp">A+</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">Швидкість читання</div>
+            <div class="hint"><span id="rateLbl">1.0×</span></div>
+          </div>
+          <input id="rate" type="range" min="0.7" max="1.4" value="1.0" step="0.05" />
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">Колір підсвітки</div>
+            <div class="hint">Default / Yellow</div>
+          </div>
+          <div class="seg">
+            <button class="segBtn" data-hc="default">Default</button>
+            <button class="segBtn" data-hc="yellow">Yellow</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">Переклад</div>
+            <div class="hint">показувати під рядком</div>
+          </div>
+          <label class="toggle">
+            <input id="showTr" type="checkbox" checked />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">Тема</div>
+            <div class="hint">нічний режим</div>
+          </div>
+          <label class="toggle">
+            <input id="theme" type="checkbox" />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">Підсвітка</div>
+            <div class="hint">активне слово/рядок</div>
+          </div>
+          <label class="toggle">
+            <input id="hl" type="checkbox" checked />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="note">
+          Переклад: локальний файл у папці книги. (Наступним кроком можна підключити API та кеш.)
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="assets/reader.js"></script>
+</body>
+</html>
