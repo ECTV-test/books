@@ -1,0 +1,1594 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Book Reader Prototype</title>
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#121826;
+      --muted:#667085;
+      --line:#e6e8ef;
+      --primary:#1e88e5;
+      --primary2:#2aa7ff;
+      --shadow:0 10px 28px rgba(16,24,40,.10);
+      --radius:18px;
+      --readerBg:#efeff3;
+      --underline: rgba(18,24,38,.35);
+
+      /* highlight theme defaults (blue) */
+      --hlWord: rgba(42,167,255,.26);
+
+      --fontSize: 22px;
+      --lineHeight: 1.9;
+
+      --safeBottom: env(safe-area-inset-bottom);
+    }
+
+    [data-theme="night"]{
+      --bg:#0b1220;
+      --card:#0f1a2f;
+      --text:#e8ecf5;
+      --muted:#a8b3c7;
+      --line:rgba(255,255,255,.10);
+      --shadow:0 10px 28px rgba(0,0,0,.45);
+      --readerBg:#0b1220;
+      --underline: rgba(232,236,245,.28);
+      --hlWord: rgba(42,167,255,.22);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit;text-decoration:none}
+    button, select{font:inherit}
+    .wrap{max-width:1120px;margin:0 auto;padding:24px 18px 86px}
+
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:10px 0 18px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;
+      font-weight:800;letter-spacing:.2px;
+      min-width:0;
+    }
+    .pill{
+      font-size:12px;color:var(--muted);
+      border:1px solid var(--line);
+      padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.35);
+      white-space:nowrap;
+    }
+    [data-theme="night"] .pill{background:rgba(255,255,255,.04)}
+    .navbtn{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--line);
+      background:var(--card);
+      padding:10px 12px;border-radius:12px;
+      box-shadow:0 2px 10px rgba(16,24,40,.06);
+      cursor:pointer;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .navbtn:active{transform:translateY(1px)}
+    .brandTitle{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:48vw;
+    }
+
+    .sectionRow{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 16px;
+    }
+    .sectionTitle{font-size:20px;font-weight:900}
+    .linkBtn{
+      color:var(--primary);
+      border:none;background:transparent;
+      padding:8px 10px;border-radius:999px;
+      cursor:pointer;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .linkBtn:hover{background:rgba(30,136,229,.08)}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(6, minmax(0,1fr));
+      gap:16px;
+    }
+    @media (max-width: 1100px){ .grid{grid-template-columns:repeat(3, minmax(0,1fr))} }
+    @media (max-width: 640px){
+      .grid{grid-template-columns:repeat(2, minmax(0,1fr))}
+      .wrap{padding-bottom:110px}
+      .brandTitle{max-width:44vw}
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      cursor:pointer;
+      transition:transform .12s ease;
+      min-height:220px;
+    }
+    .card:hover{transform:translateY(-2px)}
+    .cover{
+      width:100%;
+      aspect-ratio: 1 / 1.05;
+      background:linear-gradient(145deg, #f4c9a9, #f7efe7);
+      position:relative;
+    }
+    .cover img{width:100%;height:100%;object-fit:cover;display:block}
+    .badgeTop{
+      position:absolute;left:12px;top:12px;
+      font-size:12px;color:var(--muted);
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(0,0,0,.06);
+      padding:6px 10px;border-radius:999px;
+      backdrop-filter: blur(8px);
+      max-width: calc(100% - 24px);
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    [data-theme="night"] .badgeTop{
+      background:rgba(15,26,47,.72);
+      border-color:rgba(255,255,255,.10);
+    }
+    .cardBody{padding:12px 12px 14px}
+    .small{font-size:12px;color:var(--muted);margin:0 0 6px}
+    .title{font-size:15px;font-weight:900;margin:0;line-height:1.25}
+    .metaLine{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;
+      color:var(--muted);font-size:12px;
+    }
+    .dot{width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:6px}
+    .metaItem{display:inline-flex;align-items:center;gap:6px}
+
+    /* Details */
+    .details{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      gap:18px;
+      align-items:start;
+      margin-top:8px;
+    }
+    @media (max-width: 760px){ .details{grid-template-columns:1fr} }
+    .bookPoster{
+      border-radius:22px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      background:var(--card);
+    }
+    .bookPoster img{width:100%;display:block}
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+    .kicker{font-size:12px;color:var(--muted);margin:0 0 6px}
+    .bookName{font-size:26px;line-height:1.15;margin:0 0 10px;font-weight:950}
+    .desc{color:var(--muted);line-height:1.55;margin:10px 0 14px}
+    .infoRow{
+      display:flex;gap:12px;flex-wrap:wrap;
+      padding:10px 0 4px;color:var(--muted);font-size:13px
+    }
+    .infoRow b{color:var(--text)}
+    .ctaRow{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+    .btn{
+      border:none;cursor:pointer;
+      padding:12px 14px;border-radius:14px;
+      font-weight:900;
+      display:inline-flex;align-items:center;gap:10px;
+      white-space:nowrap;
+    }
+    .btnPrimary{background:linear-gradient(135deg, var(--primary), var(--primary2));color:white}
+    .btnGhost{background:transparent;border:1px solid var(--line);color:var(--text)}
+    .btn:active{transform:translateY(1px)}
+
+    /* Reader */
+    .readerStage{
+      background:var(--readerBg);
+      min-height:calc(100vh - 0px);
+      padding:14px 14px 118px;
+    }
+    .readerTop{
+      max-width:980px;margin:0 auto 10px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    .readerTop .left{
+      display:flex;align-items:center;gap:10px;
+      min-width:0;
+    }
+    .readerTop .rtTitle{
+      font-weight:950;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:60vw;
+    }
+    .paper{
+      max-width:860px;margin:0 auto;
+      padding:18px 22px 60px;
+      background:transparent;
+      color:var(--text);
+    }
+    .paperInner{
+      background:transparent;
+      border-radius:18px;
+      padding:10px 6px;
+    }
+    .bookTitle{
+      text-align:center;
+      font-weight:950;
+      font-size:44px;
+      margin:6px 0 20px;
+      letter-spacing:.2px;
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+    }
+    @media (max-width: 640px){
+      .bookTitle{font-size:36px}
+      .paper{padding:14px 10px 60px}
+    }
+    .para{
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-size: var(--fontSize);
+      line-height: var(--lineHeight);
+      margin: 0 0 18px;
+    }
+
+    .paraLine{ margin: 0 0 14px; }
+    .line{
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-size: calc(var(--fontSize) * 1.12); /* original a bit larger */
+      line-height: var(--lineHeight);
+      margin: 0;
+    }
+    .line.active{
+      background: var(--hlWord);
+      border-radius: 10px;
+      padding: 2px 6px;
+    }
+    .paraTrans{
+      margin-top: 6px;
+      font-size: var(--fontSize); /* translation same size as previous original */
+      line-height: 1.55;
+      color: var(--muted);        /* lighter */
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    body.hideLineTrans .paraTrans{ display:none; }
+    .w{
+      display:inline-block;
+      padding:0 2px 2px;
+      border-bottom: 2px solid var(--underline);
+      user-select:none;
+      border-radius:8px;
+      cursor:pointer; /* теперь перевод по клику */
+    }
+    .w.space{border-bottom-color:transparent;padding:0;cursor:default}
+    .w.active{
+      background: var(--hlWord);
+      border-bottom-color: transparent;
+    }
+
+    /* Bottom player */
+    .playerBar{
+      position:fixed;left:0;right:0;bottom:0;
+      background:rgba(255,255,255,.75);
+      backdrop-filter: blur(10px);
+      border-top:1px solid var(--line);
+      padding:10px 14px calc(10px + var(--safeBottom));
+      z-index:50;
+    }
+    [data-theme="night"] .playerBar{background:rgba(15,26,47,.70)}
+    .playerInner{
+      max-width:980px;margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:12px;
+      align-items:center;
+    }
+    @media (max-width: 520px){
+      .playerInner{grid-template-columns:1fr}
+      .controls{justify-content:space-between}
+    }
+    .progTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .progTitle{font-weight:950;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60vw}
+    .progMeta{color:var(--muted);font-size:12px;white-space:nowrap}
+    .bar{
+      height:10px;border-radius:999px;
+      background:rgba(0,0,0,.08);
+      overflow:hidden;
+      margin-top:8px;
+    }
+    [data-theme="night"] .bar{background:rgba(255,255,255,.10)}
+    .bar > div{
+      height:100%;width:0%;
+      background:linear-gradient(135deg, var(--primary), var(--primary2));
+      border-radius:999px;
+    }
+    .controls{display:flex;gap:10px;align-items:center;justify-content:flex-end}
+    .iconBtn{
+      border:1px solid var(--line);
+      background:var(--card);
+      width:44px;height:44px;border-radius:14px;
+      display:inline-flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      box-shadow:0 2px 10px rgba(16,24,40,.06);
+      font-weight:950;
+    }
+    .iconBtn:active{transform:translateY(1px)}
+    .playBtn{
+      width:52px;height:52px;border-radius:16px;
+      border:none;cursor:pointer;color:white;
+      background:linear-gradient(135deg, var(--primary), var(--primary2));
+      font-weight:950;
+      display:inline-flex;align-items:center;justify-content:center;
+    }
+
+    /* Popover */
+    .popover{
+      position:fixed;
+      min-width:220px;
+      max-width:340px;
+      background:var(--card);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      border-radius:16px;
+      padding:12px;
+      z-index:60;
+      display:none;
+    }
+    .popRow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .popWord{font-weight:950}
+    .popTrans{color:var(--muted);margin-top:6px;line-height:1.35}
+    .miniBtn{
+      border:1px solid var(--line);
+      background:transparent;
+      padding:6px 10px;border-radius:12px;
+      cursor:pointer;
+      font-weight:900;
+      color:var(--text);
+      white-space:nowrap;
+    }
+    .loading{opacity:.8;font-style:italic}
+
+    /* Settings */
+    .settings{
+      position:fixed;right:14px;top:70px;
+      width:360px;
+      background:var(--card);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      border-radius:18px;
+      padding:12px;
+      z-index:70;
+      display:none;
+    }
+    @media (max-width: 640px){
+      /* на телефоне настройки как bottom-sheet */
+      .settings{
+        left:14px; right:14px;
+        top:auto; bottom: calc(84px + var(--safeBottom));
+        width:auto;
+      }
+    }
+    .setHead{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:6px 4px 10px;
+      border-bottom:1px solid var(--line);
+      margin-bottom:10px;
+    }
+    .setTitle{font-weight:950}
+    .row{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:10px 4px;
+    }
+    .row small{color:var(--muted)}
+    .seg{
+      display:flex;gap:8px;align-items:center;
+      border:1px solid var(--line);
+      border-radius:14px;padding:6px;
+      background:rgba(0,0,0,.02);
+    }
+    [data-theme="night"] .seg{background:rgba(255,255,255,.03)}
+    .seg button{
+      border:none;background:transparent;cursor:pointer;
+      padding:8px 10px;border-radius:12px;font-weight:950;color:var(--text)
+    }
+    .seg button.active{background:rgba(30,136,229,.14)}
+    .toggle{
+      width:46px;height:28px;border-radius:999px;
+      background:rgba(0,0,0,.12);
+      position:relative;border:1px solid var(--line);cursor:pointer;
+    }
+    [data-theme="night"] .toggle{background:rgba(255,255,255,.12)}
+    .knob{
+      width:24px;height:24px;border-radius:50%;
+      background:var(--card);
+      position:absolute;top:1px;left:1px;
+      transition:left .15s ease;
+      border:1px solid var(--line);
+    }
+    .toggle.on{background:rgba(30,136,229,.25)}
+    .toggle.on .knob{left:21px}
+    .range{width:170px}
+    @media (max-width: 640px){ .range{width:140px} }
+    .hint{font-size:12px;color:var(--muted);padding:0 4px 8px}
+    select{
+      border:1px solid var(--line);
+      background:var(--card);
+      color:var(--text);
+      border-radius:12px;
+      padding:10px 12px;
+      outline:none;
+      min-width:170px;
+      font-weight:900;
+    }
+  </style>
+</head>
+
+<body data-theme="light">
+  <div id="app"></div>
+
+  <!-- Translation popover -->
+  <div id="popover" class="popover" role="dialog" aria-hidden="true">
+    <div class="popRow">
+      <div class="popWord" id="popWord">word</div>
+      <button class="miniBtn" id="popSpeak" title="Speak">🔊</button>
+    </div>
+    <div class="popTrans" id="popTrans">translation</div>
+  </div>
+
+  <!-- Settings -->
+  <div id="settings" class="settings" aria-hidden="true">
+    <div class="setHead">
+      <div class="setTitle">Налаштування</div>
+      <button class="miniBtn" id="setClose">✕</button>
+    </div>
+
+    <div class="row">
+      <div>
+        <div><b>Мова перекладу</b></div>
+        <small>LibreTranslate target</small>
+      </div>
+      <select id="targetLang"></select>
+    </div>
+
+    <div class="row">
+      <div>
+        <div><b>Розмір тексту</b></div>
+        <small>A− / A+</small>
+      </div>
+      <div class="seg">
+        <button id="fontMinus">A−</button>
+        <button id="fontPlus">A+</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div><b>Швидкість читання</b></div>
+        <small id="speedLabel">1.0×</small>
+      </div>
+      <input id="speed" class="range" type="range" min="0.7" max="1.4" step="0.05" value="0.7">
+    </div>
+
+    <div class="row">
+      <div>
+        <div><b>Колір підсвітки</b></div>
+        <small>Default / Yellow</small>
+      </div>
+      <div class="seg">
+        <button id="hlDefault" class="active">Default</button>
+        <button id="hlYellow">Yellow</button>
+      </div>
+    </div>
+
+    <div class="row" id="rowTapTranslate">
+      <div>
+        <div><b>Переклад</b></div>
+        <small>по кліку / тапу</small>
+      </div>
+      <div class="toggle on" id="tTranslation"><div class="knob"></div></div>
+    </div>
+
+    <div class="row" id="rowLineTranslate" style="display:none">
+      <div>
+        <div><b>Переклад рядком</b></div>
+        <small>показувати під текстом</small>
+      </div>
+      <div class="toggle on" id="tLineTranslation"><div class="knob"></div></div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div><b>Тема</b></div>
+        <small>нічний режим</small>
+      </div>
+      <div class="toggle" id="tNight"><div class="knob"></div></div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div><b>Підсвітка</b></div>
+        <small>активне слово</small>
+      </div>
+      <div class="toggle on" id="tHighlight"><div class="knob"></div></div>
+    </div>
+
+    <div class="hint">
+      Переклад: <b>LibreTranslate</b> (публічний сервіс).<br/>
+      Якщо бачиш <b>429</b> — це ліміт. Код ставить паузу і просить зачекати.
+    </div>
+  </div>
+
+  <!-- Bottom player -->
+  <div id="player" class="playerBar" style="display:none">
+    <div class="playerInner">
+      <div>
+        <div class="progTop">
+          <div class="progTitle" id="pTitle">Reader</div>
+          <div class="progMeta"><span id="pPct">0%</span></div>
+        </div>
+        <div class="bar"><div id="pFill"></div></div>
+      </div>
+      <div class="controls">
+        <button class="iconBtn" id="btnBack" title="Back">←</button>
+        <button class="iconBtn" id="btnSettings" title="Settings">⚙️</button>
+        <button class="playBtn" id="btnPlay" title="Play/Pause">▶</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ===========================
+   LibreTranslate (public)
+=========================== */
+const LIBRETRANSLATE_URL = "https://libretranslate.com/translate";
+/* Если у тебя будет ключ — вставишь сюда. Иначе оставь "" */
+const LIBRETRANSLATE_API_KEY = "8178d78d-65e4-418c-a5cf-5197a75e9313";
+
+/* 6 языков (обязательно RU+UK) */
+const TARGET_LANGS = [
+  { code:"uk", label:"Українська (UK)" },
+  { code:"ru", label:"Русский (RU)" },
+  { code:"pl", label:"Polski (PL)" },
+  { code:"de", label:"Deutsch (DE)" },
+  { code:"es", label:"Español (ES)" },
+  { code:"fr", label:"Français (FR)" }
+];
+
+/* ===========================
+   Books loading:
+   /books/index.json
+   /books/<id>/book.json
+   Fallback-book is embedded.
+=========================== */
+const BOOKS_INDEX_URL = "books/index.json";
+
+/* --------- Fallback book (твоя книга остается) --------- */
+const FALLBACK_BOOKS = [
+  {
+    id: "invisible-sandwich",
+    series: "NEW",
+    title_ua: "The Invisible Sandwich",
+    title_en: "The Invisible Sandwich",
+    level: "A1 English Learners",
+    narrator: "Диктор",
+    durationMin: 12,
+    cover: "https://picsum.photos/seed/invisible-sandwich/800/900",
+    description:
+`The Invisible Sandwich
+
+Уровень - A1 English Learners
+
+Enjoy a fun and simple English story made especially for A1 level learners.
+The Invisible Sandwich is a short audio book with clear text and easy vocabulary. It is perfect for beginners who want to read and listen at the same time.
+In this story, Tim makes a very strange sandwich. When he comes back to eat it, the sandwich is gone! Tim looks everywhere and becomes a Sandwich Detective. Step by step, he follows clues and tries to solve the mystery.`,
+    text: [
+      "The Invisible Sandwich",
+      "Chapter 1: The Best Sandwich",
+      "Tim is hungry, so he goes to the kitchen.",
+      "“I want a big sandwich!” he says.",
+      "He gets some bread and adds cheese, tomato, and lettuce.",
+      "The end."
+    ]
+  }
+];
+
+/* ---------------------------
+   State
+--------------------------- */
+const state = {
+  route: { name:"catalog", bookId:null },
+  navStack: [],
+  catalog: [],
+  bookCache: new Map(),
+  book: null,
+
+  reading: {
+    isPlaying:false,
+    speed: 0.7,
+    fontSize: 22,
+    showTranslation: true,
+    lineTranslation: true,
+    night: false,
+    highlight: true,
+    highlightTheme: "default",
+    targetLang: "uk",
+    progress: 0,
+    activeTokenIndex: -1,
+    tokenMap: [],
+    wordCount: 0,
+    timer: null,
+
+    // translation protection
+    translateCache: new Map(),
+    inFlight: false,
+    lastReqAt: 0,
+    cooldownUntil: 0
+  }
+};
+
+const app = document.getElementById("app");
+const player = document.getElementById("player");
+const pTitle = document.getElementById("pTitle");
+const pPct = document.getElementById("pPct");
+const pFill = document.getElementById("pFill");
+const btnPlay = document.getElementById("btnPlay");
+const btnSettings = document.getElementById("btnSettings");
+const btnBack = document.getElementById("btnBack");
+
+const settings = document.getElementById("settings");
+const setClose = document.getElementById("setClose");
+const fontMinus = document.getElementById("fontMinus");
+const fontPlus = document.getElementById("fontPlus");
+const speed = document.getElementById("speed");
+const speedLabel = document.getElementById("speedLabel");
+const tTranslation = document.getElementById("tTranslation");
+const rowTapTranslate = document.getElementById("rowTapTranslate");
+const rowLineTranslate = document.getElementById("rowLineTranslate");
+const tLineTranslation = document.getElementById("tLineTranslation");
+const tNight = document.getElementById("tNight");
+const tHighlight = document.getElementById("tHighlight");
+const hlDefault = document.getElementById("hlDefault");
+const hlYellow = document.getElementById("hlYellow");
+const targetLangSelect = document.getElementById("targetLang");
+
+const popover = document.getElementById("popover");
+const popWord = document.getElementById("popWord");
+const popTrans = document.getElementById("popTrans");
+const popSpeak = document.getElementById("popSpeak");
+
+function setTheme(night){
+  document.body.setAttribute("data-theme", night ? "night" : "light");
+}
+
+function applyHighlightTheme(){
+  if(state.reading.highlightTheme === "default"){
+    document.documentElement.style.setProperty("--hlWord", state.reading.night ? "rgba(42,167,255,.22)" : "rgba(42,167,255,.26)");
+    hlDefault.classList.add("active");
+    hlYellow.classList.remove("active");
+  }else{
+    document.documentElement.style.setProperty("--hlWord", "rgba(255, 213, 0, .34)");
+    hlYellow.classList.add("active");
+    hlDefault.classList.remove("active");
+  }
+}
+
+/* ===========================
+   NEW: robust asset resolving for folder-based books
+=========================== */
+function isAbsoluteUrl(u){
+  return /^https?:\/\//i.test(u) || /^data:/i.test(u);
+}
+
+function resolveBookAsset(bookId, path, fallbackFile){
+  const p = (path && String(path).trim()) ? String(path).trim() : fallbackFile;
+  if(!p) return "";
+  if(isAbsoluteUrl(p)) return p;
+  if(p.startsWith("books/")) return p;
+  return `books/${encodeURIComponent(bookId)}/${p}`;
+}
+
+function normalizeCatalogItem(x){
+  const id = x.id;
+  return {
+    ...x,
+    id,
+    cover: resolveBookAsset(id, x.cover, "cover.jpg")
+  };
+}
+
+function normalizeBookJson(book, id){
+  const b = {...book};
+  b.id = b.id || id;
+  b.text = b.text || [];
+  b.cover = resolveBookAsset(b.id, b.cover, "cover.jpg");
+  if(b.audio) b.audio = resolveBookAsset(b.id, b.audio, "");
+  return b;
+}
+
+/* ---------------------------
+   Back
+--------------------------- */
+function appBack(){
+  try{
+    if(window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === "function"){
+      window.ReactNativeWebView.postMessage(JSON.stringify({type:"BACK"}));
+      return;
+    }
+  }catch(e){}
+  const prev = state.navStack.pop();
+  if(prev) go(prev, {push:false});
+  else go({name:"catalog"}, {push:false});
+}
+
+/* ---------------------------
+   Router
+--------------------------- */
+function go(route, {push=true}={}){
+  if(push && state.route && state.route.name){
+    state.navStack.push({...state.route});
+  }
+  state.route = route;
+
+  if(route.name === "catalog"){
+    state.book = null;
+    stopReading();
+    renderCatalog();
+    hidePlayer();
+  }
+  if(route.name === "details"){
+    stopReading();
+    loadBook(route.bookId).then(book=>{
+      state.book = book;
+      renderDetails();
+      hidePlayer();
+    });
+  }
+  if(route.name === "reader"){
+    loadBook(route.bookId).then(book=>{
+      state.book = book;
+      renderReader();
+      showPlayer();
+    });
+  }
+
+  if(route.name === "bireader"){
+    loadBook(route.bookId).then(book=>{
+      state.book = book;
+      renderBiReader();
+      showPlayer();
+    });
+  }
+}
+
+function hidePlayer(){ player.style.display="none"; }
+function showPlayer(){
+  player.style.display="block";
+  pTitle.textContent = state.book?.title_en || "Reader";
+  updateProgressUI();
+}
+
+/* ===========================
+   Books loader (index.json + per-folder book.json) + fallback
+=========================== */
+async function loadCatalog(){
+  const fallbackCatalog = FALLBACK_BOOKS.map(b => normalizeCatalogItem({
+    id: b.id,
+    series: b.series,
+    title_ua: b.title_ua,
+    title_en: b.title_en,
+    level: b.level,
+    durationMin: b.durationMin,
+    cover: b.cover
+  }));
+
+  try{
+    const res = await fetch(BOOKS_INDEX_URL, {cache:"no-store"});
+    if(!res.ok) throw new Error("index not ok");
+    const remoteRaw = await res.json();
+
+    const remote = (remoteRaw || []).map(normalizeCatalogItem);
+
+    const ids = new Set(remote.map(x=>x.id));
+    state.catalog = [...remote, ...fallbackCatalog.filter(x=>!ids.has(x.id))];
+  }catch(e){
+    state.catalog = fallbackCatalog;
+  }
+}
+
+async function loadBook(id){
+  if(state.bookCache.has(id)) return state.bookCache.get(id);
+
+  const basePath = `books/${encodeURIComponent(id)}`;
+  const remoteUrl = `${basePath}/book.json`;
+
+  try{
+    const res = await fetch(remoteUrl, {cache:"no-store"});
+    if(!res.ok) throw new Error("book not ok");
+    const raw = await res.json();
+
+    // NEW: if no "text" array provided, load plain text file (book.txt)
+    if(!raw.text){
+      const textFile = raw.textFile || "book.txt";
+      const txtRes = await fetch(`${basePath}/${textFile}`, {cache:"no-store"});
+      if(txtRes.ok){
+        let txt = await txtRes.text();
+        txt = txt.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        raw.text = txt.split("\n"); // keep empty lines as ""
+      }else{
+        raw.text = [];
+      }
+    }
+
+    const book = normalizeBookJson(raw, id);
+
+    state.bookCache.set(id, book);
+    return book;
+  }catch(e){
+    const fb = FALLBACK_BOOKS.find(b=>b.id===id) || FALLBACK_BOOKS[0];
+    state.bookCache.set(fb.id, fb);
+    return fb;
+  }
+}
+
+/* ---------------------------
+   UI renderers
+--------------------------- */
+function renderTopbar(title){
+  return `
+    <div class="topbar">
+      <div class="brand">
+        <button class="navbtn" id="topBack" title="Back">← Назад</button>
+        <div style="width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#1e88e5,#2aa7ff);"></div>
+        <div class="brandTitle">${escapeHtml(title)}</div>
+        <span class="pill">GitHub Pages</span>
+      </div>
+      <button class="navbtn" id="topHome">Каталог</button>
+    </div>
+  `;
+}
+
+function renderCatalog(){
+  app.innerHTML = `
+    <div class="wrap">
+      ${renderTopbar("Library")}
+      <div class="sectionRow">
+        <div class="sectionTitle">Каталог книг</div>
+        <button class="linkBtn" id="viewAll">Дивитися всі</button>
+      </div>
+
+      <div class="grid">
+        ${state.catalog.map(b => `
+          <div class="card" data-open="${escapeHtml(b.id)}">
+            <div class="cover">
+              ${b.cover ? `<img src="${escapeHtml(b.cover)}" alt="">` : ``}
+              <div class="badgeTop">${escapeHtml(b.series || "Library")}</div>
+            </div>
+            <div class="cardBody">
+              <p class="small">${escapeHtml(b.series || "")}</p>
+              <p class="title">${escapeHtml(b.title_ua || b.title_en || "Book")}</p>
+              <div class="metaLine">
+                <span class="metaItem"><span class="dot"></span>${escapeHtml(b.level || "")}</span>
+                <span class="metaItem">🕒 ${escapeHtml(String(b.durationMin || ""))} хв</span>
+              </div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+
+  document.getElementById("topBack").onclick = appBack;
+  document.getElementById("topHome").onclick = ()=>go({name:"catalog"}, {push:false});
+  document.getElementById("viewAll").onclick = ()=>alert("Тут можна додати фільтри/пошук.");
+
+  app.querySelectorAll("[data-open]").forEach(el=>{
+    el.addEventListener("click", ()=>go({name:"details", bookId: el.dataset.open}));
+  });
+}
+
+function renderDetails(){
+  if(!state.book){ return go({name:"catalog"}, {push:false}); }
+  const b = state.book;
+
+  app.innerHTML = `
+    <div class="wrap">
+      ${renderTopbar("Бібліотека / " + (b.title_ua || b.title_en || "Book"))}
+
+      <div class="details">
+        <div class="bookPoster">
+          ${b.cover ? `<img src="${escapeHtml(b.cover)}" alt="">` : ``}
+        </div>
+
+        <div class="panel">
+          <p class="kicker">${escapeHtml(b.series || "")}</p>
+          <h1 class="bookName">${escapeHtml(b.title_en || b.title_ua || "")}</h1>
+
+          <div class="infoRow">
+            <div class="metaItem"><span class="dot"></span><b>${escapeHtml(b.level || "")}</b></div>
+            <div class="metaItem">🎙️ Озвучення: <b>${escapeHtml(b.narrator || "—")}</b></div>
+            <div class="metaItem">🕒 Час: <b>${escapeHtml(String(b.durationMin || ""))} хв</b></div>
+          </div>
+
+          <p class="desc" style="white-space:pre-wrap">${escapeHtml(b.description || "")}</p>
+
+          <div class="ctaRow">
+            <button class="btn btnPrimary" id="btnListen">🎧 Слухати</button>
+            <button class="btn btnGhost" id="btnRead">📖 Читати</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("topBack").onclick = appBack;
+  document.getElementById("topHome").onclick = ()=>go({name:"catalog"});
+  document.getElementById("btnListen").onclick = ()=>go({name:"reader", bookId: b.id});
+  document.getElementById("btnRead").onclick = ()=>go({name:"bireader", bookId: b.id});
+}
+
+function renderReader(){
+  if(!state.book){ return go({name:"catalog"}, {push:false}); }
+  const b = state.book;
+
+  setTheme(state.reading.night);
+  syncSettingsUI();
+  applyHighlightTheme();
+
+  const paragraphs = (b.text || []).map((p, i)=>renderParagraph(p, i)).join("");
+
+  app.innerHTML = `
+    <div class="readerStage">
+      <div class="readerTop">
+        <div class="left">
+          <button class="navbtn" id="readerBack">← Назад</button>
+          <div class="rtTitle">${escapeHtml(b.title_en || "")}</div>
+        </div>
+        <button class="navbtn" id="readerHome">Каталог</button>
+      </div>
+
+      <div class="paper">
+        <div class="paperInner">
+          <div class="bookTitle">${escapeHtml(b.title_en || "")}</div>
+          ${paragraphs}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("readerBack").onclick = appBack;
+  document.getElementById("readerHome").onclick = ()=>go({name:"catalog"});
+
+  document.documentElement.style.setProperty("--fontSize", state.reading.fontSize + "px");
+  document.documentElement.style.setProperty("--lineHeight", "1.9");
+
+  buildTokenMap();
+
+  // close popover on outside click
+  document.addEventListener("click", onDocClick, {capture:true});
+}
+
+
+function renderBiReader(){
+  if(!state.book){ return go({name:"catalog"}, {push:false}); }
+  const b = state.book;
+
+  setTheme(state.reading.night);
+  syncSettingsUI();
+  applyHighlightTheme();
+  hideTranslation();
+
+  const lines = (b.text || []);
+
+  app.innerHTML = `
+    <div class="readerStage">
+      <div class="readerTop">
+        <div class="left">
+          <button class="navbtn" id="readerBack">← Назад</button>
+          <div class="rtTitle">${escapeHtml(b.title_en || "")}</div>
+        </div>
+        <button class="navbtn" id="readerHome">Каталог</button>
+      </div>
+
+      <div class="paper">
+        <div class="paperInner">
+          <div class="bookTitle">${escapeHtml(b.title_en || "")}</div>
+
+          ${lines.map((ln, i)=>{
+            const raw = String(ln ?? "");
+            if(raw === ""){
+              return `<div style="height:14px"></div>`;
+            }
+            return `
+              <div class="paraLine">
+                <div class="line" data-token="line" data-idx="${i}" data-raw="${escapeHtml(raw)}">${escapeHtml(raw)}</div>
+                <div class="paraTrans" data-for="${i}"></div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("readerBack").onclick = appBack;
+  document.getElementById("readerHome").onclick = ()=>go({name:"catalog"});
+
+  document.documentElement.style.setProperty("--fontSize", state.reading.fontSize + "px");
+  document.documentElement.style.setProperty("--lineHeight", "1.9");
+
+  buildLineMap();
+  document.body.classList.toggle("hideLineTrans", !state.reading.lineTranslation);
+  initLineTranslations();
+}
+
+function buildLineMap(){
+  const els = [...document.querySelectorAll('.line[data-token="line"]')];
+  state.reading.tokenMap = els;
+  state.reading.wordCount = els.length;
+}
+
+/* ---------------------------
+   Text tokens
+--------------------------- */
+function normalizeWord(w){
+  return w.toLowerCase().replace(/^[^a-z0-9']+|[^a-z0-9']+$/gi,"");
+}
+
+function renderParagraph(text, pIndex){
+  if(text === ""){
+    return `<p class="para" data-para="${pIndex}"><span style="border-bottom-color:transparent;opacity:.35">—</span></p>`;
+  }
+  const tokens = String(text).match(/(\s+|[A-Za-z0-9']+|[^\sA-Za-z0-9'])/g) || [String(text)];
+  const isHeading = /^Chapter\s\d+:/i.test(text) || /^SUSPECTS:/i.test(text) || /^The Invisible Sandwich$/i.test(text);
+
+  return `
+    <p class="para" data-para="${pIndex}" style="${isHeading ? "font-weight:950;letter-spacing:.2px" : ""}">
+      ${tokens.map((t)=>{
+        if(/^\s+$/.test(t)) return `<span class="w space" data-token="space"> </span>`;
+        const isWord = /^[A-Za-z0-9']+$/.test(t);
+        if(!isWord){
+          return `<span class="w" data-token="punct" data-raw="${escapeHtml(t)}" style="border-bottom-color:transparent;cursor:default">${escapeHtml(t)}</span>`;
+        }
+        const raw = t;
+        const key = normalizeWord(raw);
+        return `<span class="w" data-token="word" data-key="${escapeHtml(key)}" data-raw="${escapeHtml(raw)}">${escapeHtml(raw)}</span>`;
+      }).join("")}
+    </p>
+  `;
+}
+
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+function buildTokenMap(){
+  const spans = [...document.querySelectorAll('.w[data-token="word"]')];
+  state.reading.tokenMap = spans;
+  state.reading.wordCount = spans.length;
+
+  // IMPORTANT: translation only by click/tap to avoid 429
+  spans.forEach((sp)=>{
+    sp.addEventListener("click", (e)=> {
+      if(!state.reading.showTranslation) return;
+      e.stopPropagation();
+      showTranslation(sp);
+    });
+  });
+}
+
+/* ---------------------------
+   Translation (LibreTranslate) + 429 protection
+--------------------------- */
+async function translateWord(word){
+  const clean = normalizeWord(word);
+  if(!clean) return "—";
+
+  const cacheKey = `${state.reading.targetLang}|${clean}`;
+  if(state.reading.translateCache.has(cacheKey)) return state.reading.translateCache.get(cacheKey);
+
+  const now = Date.now();
+
+  // cooldown after 429
+  if(now < (state.reading.cooldownUntil || 0)){
+    const sec = Math.max(1, Math.ceil((state.reading.cooldownUntil - now)/1000));
+    return `⏳ Ліміт перекладу. Спробуй через ${sec}s.`;
+  }
+
+  // block parallel requests
+  if(state.reading.inFlight){
+    return "…";
+  }
+
+  // throttle: min 700ms between requests
+  if(now - (state.reading.lastReqAt || 0) < 700){
+    return "…";
+  }
+
+  state.reading.inFlight = true;
+  state.reading.lastReqAt = now;
+
+  const payload = {
+    q: clean,
+    source: "auto",
+    target: state.reading.targetLang || "uk",
+    format: "text",
+    alternatives: 3,
+    api_key: LIBRETRANSLATE_API_KEY || ""
+  };
+
+  try{
+    const res = await fetch(LIBRETRANSLATE_URL, {
+      method:"POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if(res.status === 429){
+      state.reading.cooldownUntil = Date.now() + 20000; // 20s pause
+      return "⏳ Ліміт перекладу. Зачекай 20 секунд.";
+    }
+
+    if(!res.ok){
+      return `— (помилка ${res.status})`;
+    }
+
+    const data = await res.json().catch(()=> ({}));
+    const translated = data.translatedText || "—";
+    state.reading.translateCache.set(cacheKey, translated);
+    return translated;
+  }catch(e){
+    return "— (не вдалося підключитися)";
+  }finally{
+    state.reading.inFlight = false;
+  }
+}
+
+async function translateTextAny(text){
+  const s = String(text || "").trim();
+  if(!s) return "";
+
+  const cacheKey = `LINE|${state.reading.targetLang}|${s}`;
+  if(state.reading.translateCache.has(cacheKey)) return state.reading.translateCache.get(cacheKey);
+
+  const now = Date.now();
+
+  // cooldown after 429
+  if(now < (state.reading.cooldownUntil || 0)){
+    const sec = Math.max(1, Math.ceil((state.reading.cooldownUntil - now)/1000));
+    return `⏳ Ліміт перекладу. Спробуй через ${sec}s.`;
+  }
+
+  // block parallel requests
+  if(state.reading.inFlight){
+    return "…";
+  }
+
+  // throttle a bit more for line translations
+  if(now - (state.reading.lastReqAt || 0) < 900){
+    return "…";
+  }
+
+  state.reading.inFlight = true;
+  state.reading.lastReqAt = now;
+
+  const payload = {
+    q: s,
+    source: "auto",
+    target: state.reading.targetLang || "uk",
+    format: "text",
+    api_key: LIBRETRANSLATE_API_KEY || ""
+  };
+
+  try{
+    const res = await fetch(LIBRETRANSLATE_URL, {
+      method:"POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if(res.status === 429){
+      state.reading.cooldownUntil = Date.now() + 20000; // 20s pause
+      return "⏳ Ліміт перекладу. Зачекай 20 секунд.";
+    }
+
+    if(!res.ok){
+      return `— (помилка ${res.status})`;
+    }
+
+    const data = await res.json().catch(()=> ({}));
+    const translated = data.translatedText || "—";
+    state.reading.translateCache.set(cacheKey, translated);
+    return translated;
+  }catch(e){
+    return "— (не вдалося підключитися)";
+  }finally{
+    state.reading.inFlight = false;
+  }
+}
+
+let lineObserver = null;
+
+function initLineTranslations(){
+  const isBi = state.route?.name === "bireader";
+  if(!isBi) return;
+  if(!state.reading.lineTranslation) return;
+
+  const lines = [...document.querySelectorAll('.line[data-token="line"]')];
+  if(!lines.length) return;
+
+  if(lineObserver) lineObserver.disconnect();
+
+  lineObserver = new IntersectionObserver(async (entries)=>{
+    for(const en of entries){
+      if(!en.isIntersecting) continue;
+      const el = en.target;
+      const idx = el.dataset.idx;
+      const transEl = document.querySelector(`.paraTrans[data-for="${idx}"]`);
+      if(!transEl || transEl.dataset.done === "1") continue;
+
+      transEl.textContent = "Переклад…";
+      transEl.classList.add("loading");
+
+      const tr = await translateTextAny(el.dataset.raw || "");
+      transEl.classList.remove("loading");
+      transEl.textContent = tr;
+      transEl.dataset.done = "1";
+    }
+  }, {root:null, threshold:0.2});
+
+  lines.forEach(el=>lineObserver.observe(el));
+}
+
+
+async function showTranslation(span){
+  const raw = span.dataset.raw || "";
+  popWord.textContent = raw;
+
+  // Listen mode: pause narration while popover is open
+  try{
+    if(state.route?.name === "reader" && state.book && state.reading.isPlaying && ("speechSynthesis" in window)){
+      // pause only if not already paused
+      if(!window.speechSynthesis.paused){
+        state.reading.wasPlayingBeforePopover = true;
+        state.reading.pausedForPopover = true;
+        window.speechSynthesis.pause();
+      }
+    }
+  }catch(e){}
+
+
+  popTrans.textContent = "Переклад…";
+  popTrans.classList.add("loading");
+
+  const r = span.getBoundingClientRect();
+
+  // Try to place popover above word, clamp to screen
+  const popW = 340;
+  const x = Math.min(window.innerWidth - popW - 12, Math.max(12, r.left));
+  const y = Math.max(12, r.top - 92);
+
+  popover.style.left = x + "px";
+  popover.style.top = y + "px";
+  popover.style.display = "block";
+  popover.setAttribute("aria-hidden","false");
+
+  const tr = await translateWord(raw);
+  popTrans.classList.remove("loading");
+  popTrans.textContent = tr;
+
+  popSpeak.onclick = ()=>ttsSpeak(raw, {lang: "en-US", rate: state.reading.speed});
+}
+
+function hideTranslation(){
+  popover.style.display = "none";
+
+  // Listen mode: resume narration after closing popover
+  try{
+    if(state.route?.name === "reader" && state.reading.pausedForPopover && state.reading.wasPlayingBeforePopover && state.reading.isPlaying && ("speechSynthesis" in window)){
+      state.reading.pausedForPopover = false;
+      state.reading.wasPlayingBeforePopover = false;
+      window.speechSynthesis.resume();
+    }
+  }catch(e){}
+  state.reading.pausedForPopover = false;
+  state.reading.wasPlayingBeforePopover = false;
+
+  popover.setAttribute("aria-hidden","true");
+}
+
+function onDocClick(e){
+  if(!popover.contains(e.target)) hideTranslation();
+}
+
+/* ---------------------------
+   TTS demo + deterministic highlight (stable)
+--------------------------- */
+function ttsSpeak(text, {lang="en-US", rate=1.0}={}){
+  if(!("speechSynthesis" in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang;
+  u.rate = rate;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
+
+function startReading(){
+  if(!state.book) return;
+  stopReading();
+  state.reading.isPlaying = true;
+  btnPlay.textContent = "⏸";
+  hideTranslation();
+
+  // demo speak all text
+  const fullText = (state.book.text || []).filter(Boolean).join(" ");
+  if("speechSynthesis" in window){
+    const u = new SpeechSynthesisUtterance(fullText);
+    u.lang = "en-US";
+    u.rate = state.reading.speed;
+    u.onend = ()=>finishReading();
+    u.onerror = ()=>finishReading();
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  startDeterministicHighlight();
+}
+
+function startDeterministicHighlight(){
+  const n = state.reading.wordCount;
+  if(!n) return;
+
+  const baseWpm = 150;
+  const wpm = baseWpm * state.reading.speed;
+  const msPerWord = Math.max(180, Math.round(60000 / wpm));
+
+  let idx = 0;
+  state.reading.timer = setInterval(()=>{
+    if(!state.reading.isPlaying) return;
+
+    setActiveWord(idx);
+    state.reading.progress = (idx+1) / n;
+    updateProgressUI();
+
+    idx++;
+    if(idx >= n) finishReading();
+  }, msPerWord);
+}
+
+function pauseReading(){
+  state.reading.isPlaying = false;
+  btnPlay.textContent = "▶";
+  if("speechSynthesis" in window) window.speechSynthesis.pause();
+}
+function resumeReading(){
+  state.reading.isPlaying = true;
+  btnPlay.textContent = "⏸";
+  if("speechSynthesis" in window) window.speechSynthesis.resume();
+}
+function stopReading(){
+  state.reading.isPlaying = false;
+  btnPlay.textContent = "▶";
+  if(state.reading.timer) clearInterval(state.reading.timer);
+  state.reading.timer = null;
+
+  clearActiveWord();
+  state.reading.progress = 0;
+  updateProgressUI();
+
+  if("speechSynthesis" in window) window.speechSynthesis.cancel();
+  state.reading.pausedForPopover = false;
+  state.reading.wasPlayingBeforePopover = false;
+}
+function finishReading(){
+  state.reading.isPlaying = false;
+  btnPlay.textContent = "▶";
+  if(state.reading.timer) clearInterval(state.reading.timer);
+  state.reading.timer = null;
+
+  state.reading.progress = 1;
+  updateProgressUI();
+
+  if("speechSynthesis" in window) window.speechSynthesis.cancel();
+}
+
+function clearActiveWord(){
+  const prev = state.reading.activeTokenIndex;
+  if(prev >= 0 && state.reading.tokenMap[prev]){
+    state.reading.tokenMap[prev].classList.remove("active");
+  }
+  state.reading.activeTokenIndex = -1;
+}
+
+function setActiveWord(idx){
+  if(!state.reading.highlight) return;
+  if(idx === state.reading.activeTokenIndex) return;
+
+  const prev = state.reading.activeTokenIndex;
+  if(prev >= 0 && state.reading.tokenMap[prev]){
+    state.reading.tokenMap[prev].classList.remove("active");
+  }
+
+  const sp = state.reading.tokenMap[idx];
+  if(sp){
+    sp.classList.add("active");
+    state.reading.activeTokenIndex = idx;
+
+    // gentle scroll
+    const r = sp.getBoundingClientRect();
+    const topZone = window.innerHeight * 0.25;
+    const botZone = window.innerHeight * 0.75;
+    if(r.top < topZone || r.bottom > botZone){
+      window.scrollBy({top: (r.top - window.innerHeight/2), behavior:"smooth"});
+    }
+  }
+}
+
+/* ---------------------------
+   Progress UI
+--------------------------- */
+function updateProgressUI(){
+  const pct = Math.round((state.reading.progress || 0) * 100);
+  pPct.textContent = pct + "%";
+  pFill.style.width = pct + "%";
+}
+
+/* ---------------------------
+   Settings UI
+--------------------------- */
+function toggleUI(el, on){ el.classList.toggle("on", !!on); }
+function openSettings(){
+  syncSettingsUI();
+  settings.style.display = "block";
+  settings.setAttribute("aria-hidden","false");
+}
+function closeSettings(){
+  settings.style.display = "none";
+  settings.setAttribute("aria-hidden","true");
+}
+function syncSettingsUI(){
+  targetLangSelect.value = state.reading.targetLang;
+  speed.value = String(state.reading.speed);
+  speedLabel.textContent = state.reading.speed.toFixed(2) + "×";
+  toggleUI(tTranslation, state.reading.showTranslation);
+  toggleUI(tNight, state.reading.night);
+  toggleUI(tHighlight, state.reading.highlight);
+  setTheme(state.reading.night);
+  applyHighlightTheme();
+  // mode-specific settings
+  const isBi = state.route?.name === "bireader";
+
+  if(rowTapTranslate) rowTapTranslate.style.display = isBi ? "none" : "flex";
+  if(rowLineTranslate) rowLineTranslate.style.display = isBi ? "flex" : "none";
+
+  if(tLineTranslation){
+    toggleUI(tLineTranslation, state.reading.lineTranslation);
+  }
+
+  document.body.classList.toggle("hideLineTrans", isBi && !state.reading.lineTranslation);
+}
+
+/* ---------------------------
+   Controls
+--------------------------- */
+btnPlay.onclick = ()=>{
+  if(!state.book) return;
+  if(!state.reading.isPlaying){
+    if("speechSynthesis" in window && window.speechSynthesis.paused) resumeReading();
+    else startReading();
+  }else{
+    pauseReading();
+  }
+};
+btnBack.onclick = appBack;
+btnSettings.onclick = ()=>{
+  const isOpen = settings.style.display === "block";
+  if(isOpen) closeSettings(); else openSettings();
+};
+setClose.onclick = closeSettings;
+
+fontMinus.onclick = ()=>{
+  state.reading.fontSize = Math.max(16, state.reading.fontSize - 2);
+  document.documentElement.style.setProperty("--fontSize", state.reading.fontSize + "px");
+};
+fontPlus.onclick = ()=>{
+  state.reading.fontSize = Math.min(34, state.reading.fontSize + 2);
+  document.documentElement.style.setProperty("--fontSize", state.reading.fontSize + "px");
+};
+
+speed.oninput = ()=>{
+  state.reading.speed = Number(speed.value);
+  speedLabel.textContent = state.reading.speed.toFixed(2) + "×";
+  if(state.reading.isPlaying) startReading();
+};
+
+hlDefault.onclick = ()=>{
+  state.reading.highlightTheme = "default";
+  applyHighlightTheme();
+};
+hlYellow.onclick = ()=>{
+  state.reading.highlightTheme = "yellow";
+  applyHighlightTheme();
+};
+
+tTranslation.onclick = ()=>{
+  state.reading.showTranslation = !state.reading.showTranslation;
+  toggleUI(tTranslation, state.reading.showTranslation);
+  if(!state.reading.showTranslation) hideTranslation();
+};
+
+tLineTranslation.onclick = ()=>{
+  state.reading.lineTranslation = !state.reading.lineTranslation;
+  toggleUI(tLineTranslation, state.reading.lineTranslation);
+
+  const isBi = state.route?.name === "bireader";
+  if(isBi){
+    document.body.classList.toggle("hideLineTrans", !state.reading.lineTranslation);
+    if(state.reading.lineTranslation) initLineTranslations();
+  }
+};
+
+tNight.onclick = ()=>{
+  state.reading.night = !state.reading.night;
+  toggleUI(tNight, state.reading.night);
+  setTheme(state.reading.night);
+  applyHighlightTheme();
+};
+tHighlight.onclick = ()=>{
+  state.reading.highlight = !state.reading.highlight;
+  toggleUI(tHighlight, state.reading.highlight);
+  if(!state.reading.highlight) clearActiveWord();
+};
+
+targetLangSelect.onchange = ()=>{
+  state.reading.targetLang = targetLangSelect.value;
+  state.reading.translateCache.clear();
+  hideTranslation();
+};
+
+// close settings on outside click
+document.addEventListener("click", (e)=>{
+  if(settings.style.display !== "block") return;
+  if(settings.contains(e.target) || e.target === btnSettings) return;
+  closeSettings();
+});
+
+/* ---------------------------
+   Init
+--------------------------- */
+(function init(){
+  TARGET_LANGS.forEach(l=>{
+    const opt = document.createElement("option");
+    opt.value = l.code;
+    opt.textContent = l.label;
+    targetLangSelect.appendChild(opt);
+  });
+  targetLangSelect.value = state.reading.targetLang;
+
+  loadCatalog().then(()=>go({name:"catalog"}, {push:false}));
+})();
+</script>
+</body>
+</html>
